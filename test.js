@@ -25,7 +25,8 @@ async function getData(input, location) {
                 itemInfor: [
                   {
                     itemName: item.name,
-                    itemPrice: item.price
+                    itemPrice: item.price,
+                    itemId: item.id
                   }
                 ],
                 keyword: item.keywords
