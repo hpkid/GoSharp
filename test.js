@@ -20,6 +20,7 @@ async function getData(input, location) {
             if (item.id.includes(input[i].toLowerCase())) {
               var infor = {
                 name: data[storeName].store_name,
+                id: data[storeName].store_id,
                 location: data[storeName].location,
                 itemInfor: [
                   {
