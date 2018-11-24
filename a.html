@@ -254,10 +254,21 @@
       var publicApi = {
         getRoutes,
         getPairs,
-        getRouteSteps
+        getRouteSteps,
+        validStoreList
       };
       return publicApi;
-
+    
+        function validStoreList(shoppingList, storeList) {
+      if (shoppingList.length < storeList.length) {
+        return false;
+      }
+      return storeList.every(store =>
+        store.itemInfo.some(item =>
+          shoppingList.includes(item.itemId))
+      )
+    }
+      
       function getRoutes(points) {
         var results = [];
         if (points.length === 1) {
