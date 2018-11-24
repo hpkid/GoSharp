@@ -60,17 +60,19 @@
         // console.log("combination", routeCombination);
 
         var leastWalkRoutes = [];
-        var routeCombination = [];
-        getData(input, "turku").then(value => {
+        var routeCombination = await getData(input, "turku").then(value => {
           // console.log("listStoreHaveItem", value);
           // console.log("-------------------------------------");
           leastWalkRoutes = groupByStore(value.listStoreHaveItem).map(
-            store => store.location
+            store => store
           );
           console.log("leastWalkRoutes: ", leastWalkRoutes);
-          routeCombination = comFn.getRouteSteps(leastWalkRoutes);
-          console.log("combination", routeCombination);
+          return comFn.getRouteSteps(leastWalkRoutes);
+          // console.log("combination", routeCombination);
         });
+        console.log(routeCombination);
+
+        console.log(55);
 
         var routes = [];
         for (const r of routeCombination) {
@@ -85,7 +87,7 @@
         }
 
         routes.sort((a, b) => a.totalTime - b.totalTime);
-        console.log(routes);
+        console.log("routes:", routes);
       });
     }
     //   FUNCTIONS ===============================================
