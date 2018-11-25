@@ -26,7 +26,8 @@ async function getData(input, location) {
                   {
                     itemName: item.name,
                     itemPrice: item.price,
-                    itemId: item.id
+                    itemId: item.id,
+                    itemBrand: item.keywords.brand
                   }
                 ],
                 keyword: item.keywords
@@ -78,8 +79,11 @@ function groupByStore(listStoreHaveItem) {
   return result;
 }
 
-// getData(input, "turku").then(value => {
-//   console.log("listStoreHaveItem", value);
-//   console.log("-------------------------------------");
-//   console.log(groupByStore(value.listStoreHaveItem));
-// });
+getData(input, "turku").then(value => {
+  console.log("listStoreHaveItem cua Phu", value);
+  var phuJson = JSON.stringify(value.lessMoney);
+  console.log(phuJson);
+
+  console.log("-------------------------------------");
+  console.log(groupByStore(value.listStoreHaveItem));
+});
