@@ -27,7 +27,8 @@
   (function IFFE() {
     initMap();
   })();
-  var set = [];
+  var setLeastWalk = [];
+  var setLeastMoney = [];
   function initMap() {
     var directionsService = new google.maps.DirectionsService();
     var directionsDisplay = new google.maps.DirectionsRenderer();
@@ -62,39 +63,113 @@
       // console.log("combination", routeCombination);
 
       var leastWalkRoutes = [];
+      var leastMoneyRoutes = [];
+      var validSetLeastWalk = [];
+      var validSetLeastMoney = [];
       var routeCombination = await getData(input, "turku").then(value => {
-        // console.log("listStoreHaveItem", value);
-        // console.log("-------------------------------------");
         leastWalkRoutes = groupByStore(value.listStoreHaveItem).map(
-          store => store.location
+          store => store
         );
-        
-        // get all 4-store max possible routes from the list of stores
-        for(var i = 0; i < 4; i++) {
-          comFn.getAllCombination(leastWalkRoutes, i, 0, [], set);
-        }
-        console.log(set);
+        leastMoneyRoutes = value.lessMoney;
 
-        console.log("leastWalkRoutes: ", leastWalkRoutes);
-        return comFn.getRouteSteps(set[86]);
+        // get all 4-store max possible routes from the list of stores
+        for (var i = 0; i < 4; i++) {
+          comFn.getAllCombination(leastWalkRoutes, i, 0, [], setLeastWalk);
+          comFn.getAllCombination(leastMoneyRoutes, i, 0, [], setLeastMoney);
+        }
+        // console.log(setLeastWalk);
+        var shoppingList = ["red_milk", "sugar", "minced_meat", "sweet_chilli_sauce"];
+        validSetLeastWalk = setLeastWalk.filter(s => comFn.validStoreList(shoppingList, s));
+        validSetLeastMoney = setLeastMoney.filter(s => comFn.validStoreList(shoppingList, s));
+
+        // console.log("leastWalkRoutes: ", leastWalkRoutes);
+        // return comFn.getRouteSteps(set[86]);
         // console.log("combination", routeCombination);
       });
-      console.log(comFn.getRouteSteps(set[86]));
+      console.log("least walk:", validSetLeastWalk);
+      console.log("least money:", validSetLeastMoney);
+      // console.log(comFn.getRouteSteps(set[86]));
 
-      var routes = [];
-      for (const r of routeCombination) {
-        try {
-          let result = await fn.findRoute(r, 15);
-          let path = fn.getRouteLatLng(result);
-          let totalTime = fn.getDuration(result);
-          routes.push({ r, path, totalTime });
-        } catch (err) {
-          continue;
+
+      var leastMoneyRoutes = [];
+      
+      // least money
+      for (let set of validSetLeastMoney) {
+        let locationSet = set.map(s => {
+          // console.log("Store", s);
+          return s.location;
+          });
+
+        let steps = comFn.getRouteSteps(locationSet);
+        // console.log("step", steps);
+        locationSet.unshift({ lat: 60.4638544, lng: 22.295729299999948 });
+        locationSet.push({ lat: 60.4859094, lng: 22.173445899999933 });
+        for (const r of steps) {
+          try {
+            let result = await fn.findRoute(r, 15);
+            // console.log("result", result);
+            let path = await fn.getRouteLatLng(result);
+            let totalTime = await fn.getDuration(result);
+            leastMoneyRoutes.push({ r, path, totalTime });
+            console.log("LM object ne", { r, path, totalTime });
+
+          } catch (err) {
+            continue;
+          }
+
+        };
+      };
+      leastMoneyRoutes.sort((a, b) => a.totalTime - b.totalTime);
+      console.log("Least money routes:", leastMoneyRoutes);
+      
+      var leastWalkRoutes = [];
+      // least walk
+      for (let setLW of validSetLeastWalk) {
+        let locationSetLW = setLW.map(s => s.location);
+        // console.log(locationSet);
+        
+        let stepsLW = comFn.getRouteSteps(locationSetLW);
+        // console.log("step", steps);
+        locationSetLW.unshift({ lat: 60.4638544, lng: 22.295729299999948 });
+        locationSetLW.push({ lat: 60.4859094, lng: 22.173445899999933 });
+        for (const r of stepsLW) {
+          try {
+            console.log(r);
+            
+            let result = await fn.findRoute(r, 15);
+            console.log("result", result);
+            
+            let path = await fn.getRouteLatLng(result);
+            let totalTime = await fn.getDuration(result);
+            leastWalkRoutes.push({ r, path, totalTime });
+            console.log("LW object ne", { r, path, totalTime });
+
+          } catch (err) {
+            console.log(err);
+            // return;
+            continue;
+          }
         }
-      }
 
-      routes.sort((a, b) => a.totalTime - b.totalTime);
-      console.log("routes:", routes);
+      };
+      leastWalkRoutes.sort((a, b) => a.totalTime - b.totalTime);
+      console.log("Least walk routes:", leastWalkRoutes);
+      
+      // var routeCombination = comFn.getRouteSteps(["kaupatori turku", "variso turku", "raisio turku"]);
+      // var routes = [];
+      // for (const r of routeCombination) {
+      //   try {
+      //     let result = await fn.findRoute(r, 15);
+      //     let path = fn.getRouteLatLng(result);
+      //     let totalTime = fn.getDuration(result);
+      //     routes.push({ r, path, totalTime });
+      //   } catch (err) {
+      //     continue;
+      //   }
+      // }
+
+      // routes.sort((a, b) => a.totalTime - b.totalTime);
+      // console.log("routes:", routes);
     });
   }
   //   FUNCTIONS ===============================================
@@ -267,13 +342,23 @@
     };
     return publicApi;
     function validStoreList(shoppingList, storeList) {
-      if (shoppingList.length < storeList.length) {
-        return false;
+      if (shoppingList.length < storeList.length) return false;
+      var listSet = new Set();
+      console.log("=======================");
+
+      console.log(storeList);
+
+      var isValid = storeList.every(store => {
+        let key = false;
+        store.itemInfor.forEach(item =>
+          shoppingList.includes(item.itemId) && (listSet.add(item.itemId), key = true)
+        )
+        return key;
       }
-      return storeList.every(store =>
-        store.itemInfo.some(item =>
-          shoppingList.includes(item.itemId))
       )
+
+
+      return isValid && listSet.size == shoppingList.length
     }
 
     function getRoutes(points) {
@@ -334,21 +419,22 @@
   }
 </script>
 
-  </script>
+</script>
 
-  <!-- lay data tu firebase -->
+<!-- lay data tu firebase -->
 
-  <script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
-  <script>
-    // Initialize Firebase
-    var config = {
-      apiKey: "AIzaSyBey_S3YUZryqNs01uIVHIc2KzCcycxEos",
-      authDomain: "gosharp-2ea48.firebaseapp.com",
-      databaseURL: "https://gosharp-2ea48.firebaseio.com",
-      projectId: "gosharp-2ea48",
-      storageBucket: "gosharp-2ea48.appspot.com",
-      messagingSenderId: "709829363587"
-    };
-    firebase.initializeApp(config);
-  </script>
+<script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBey_S3YUZryqNs01uIVHIc2KzCcycxEos",
+    authDomain: "gosharp-2ea48.firebaseapp.com",
+    databaseURL: "https://gosharp-2ea48.firebaseio.com",
+    projectId: "gosharp-2ea48",
+    storageBucket: "gosharp-2ea48.appspot.com",
+    messagingSenderId: "709829363587"
+  };
+  firebase.initializeApp(config);
+</script>
+
 </html>
