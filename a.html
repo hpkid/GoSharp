@@ -70,7 +70,7 @@
         leastWalkRoutes = groupByStore(value.listStoreHaveItem).map(
           store => store
         );
-        leastMoneyRoutes = value.lessMoney;
+        leastMoneyRoutes = groupByStore(value.lessMoney);
 
         // get all 4-store max possible routes from the list of stores
         for (var i = 0; i < 4; i++) {
@@ -120,7 +120,7 @@
         };
       };
       leastMoneyRoutes.sort((a, b) => a.totalTime - b.totalTime);
-      console.log("Least money routes:", leastMoneyRoutes);
+      console.log("Least money routes:", leastMoneyRoutes.filter(r=> r.totalTime>0)[0]);
       
       var leastWalkRoutes = [];
       // least walk
@@ -134,10 +134,10 @@
         locationSetLW.push({ lat: 60.4859094, lng: 22.173445899999933 });
         for (const r of stepsLW) {
           try {
-            console.log(r);
+            // console.log(r);
             
             let result = await fn.findRoute(r, 15);
-            console.log("result", result);
+            // console.log("result", result);
             
             let path = await fn.getRouteLatLng(result);
             let totalTime = await fn.getDuration(result);
@@ -145,7 +145,7 @@
             console.log("LW object ne", { r, path, totalTime });
 
           } catch (err) {
-            console.log(err);
+            // console.log(err);
             // return;
             continue;
           }
