@@ -19,12 +19,14 @@ async function getData(input, location) {
           if (item.in_store) {
             if (item.id.includes(input[i].toLowerCase())) {
               var infor = {
-                name: storeName,
+                name: data[storeName].store_name,
+                id: data[storeName].store_id,
                 location: data[storeName].location,
                 itemInfor: [
                   {
                     itemName: item.name,
-                    itemPrice: item.price
+                    itemPrice: item.price,
+                    itemId: item.id
                   }
                 ],
                 keyword: item.keywords
