@@ -14,6 +14,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Image
 } from 'react-native'
 import { isEqual } from 'lodash'
 import Icon from 'react-native-vector-icons/MaterialIcons'
@@ -1033,7 +1034,7 @@ class SectionedMultiSelect extends PureComponent {
                       styles.button,
                       ]}
                     >
-                      <Text style={[{ fontSize: 18, color: '#ffffff' }, confirmFont, styles.confirmText]}>
+                      <Text style={[{ fontSize: 18, color: '#203546' }, confirmFont, styles.confirmText]}>
                         {confirmText}
                       </Text>
                     </View>

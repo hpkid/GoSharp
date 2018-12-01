@@ -297,7 +297,7 @@ export default class Timeline extends Component {
         innerCircle = (
           <Ionicons
             name={iconSource}
-            size={15}
+            size={22}
             color="#000"
         />
         );

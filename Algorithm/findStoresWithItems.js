@@ -1,33 +1,26 @@
-var input = ["red_milk", "sugar", "minced_meat", "sweet_chilli_sauce"];
+// Receive a list of shopping items, find all stores that have them and their information
+var input = ["Red Milk", "Sugar", "Meat", "Chilli Sauce"];
 
-async function getData(input, location) {
+async function getData(input) {
   var lessMoney = [];
   let listStoreHaveItem = [];
   try {
-    const res = await axios(`http://localhost:3000/${location}`);
-    data = res.data[0].stores;
-    // console.log(data);
-
-    for (let i = 0; i < input.length; i++) {
-      input[i] = input[i].toLowerCase();
-    }
+    const res = await axios(`http://localhost:3000/stores`);
+    data = res.data;
 
     for (let i = 0; i < input.length; i++) {
       var listItem = [];
       Object.keys(data).forEach(function(storeName) {
         data[storeName].items.map(item => {
           if (item.in_store) {
-            if (item.id.includes(input[i].toLowerCase())) {
+            if (item.categories[0].name.includes(input[i])) {
               var infor = {
-                name: data[storeName].store_name,
-                id: data[storeName].store_id,
+                name: storeName,
                 location: data[storeName].location,
                 itemInfor: [
                   {
                     itemName: item.name,
-                    itemPrice: item.price,
-                    itemId: item.id,
-                    itemBrand: item.keywords.brand
+                    itemPrice: item.price
                   }
                 ],
                 keyword: item.keywords
@@ -55,7 +48,6 @@ async function getData(input, location) {
   } catch (error) {
     // console.log(error);
     alert("du ma sai roi");
-    console.log(error);
   }
 }
 
@@ -79,11 +71,8 @@ function groupByStore(listStoreHaveItem) {
   return result;
 }
 
-getData(input, "turku").then(value => {
-  console.log("listStoreHaveItem cua Phu", value);
-  var phuJson = JSON.stringify(value.lessMoney);
-  console.log(phuJson);
-
+getData(input).then(value => {
+  console.log(value);
   console.log("-------------------------------------");
   console.log(groupByStore(value.listStoreHaveItem));
 });

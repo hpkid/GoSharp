@@ -10,13 +10,12 @@ import {
   FlatList,
 } from 'react-native';
 import { Constants, MapView } from 'expo';
-import content from './content';
 // import Timeline from 'react-native-timeline-listview';
 import Timeline from '../components/timeline-listview';
 import Collapsible from 'react-native-collapsible';
 import TimelineItem from '../components/TimeLineItem';
 import { Ionicons } from '@expo/vector-icons';
-
+import d from './d';
 
 // https://github.com/habibridho/RNCollapsingToolbar/blob/master/App.js
 
@@ -32,68 +31,26 @@ const polylineCoors = [
   { latitude: 59.7665248, longitude: 25.4161628 },
 ];
 // TODO: number of steps to follow, each store point will have a collapsible list of items that user will buy
-const data = [
-  {
-    time: '09:00',
-    title: 'ORIGIN',
-    icon: 'md-locate',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-  {
-    time: '10:45',
-    title: 'Walk x min',
-    icon: 'md-walk',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-  {
-    time: '12:00',
-    title: 'Liddl - x min - y euro',
-    icon: 'md-cart',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-  {
-    time: '14:00',
-    title: 'SS-Market - x min - y euro',
-        icon: 'md-cart',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-  {
-    time: '16:30',
-    title: 'KK-Supermarket - x min - y euro',
-        icon: 'md-cart',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-  {
-    time: '17:00',
-    title: 'DESTINATION',
-    icon: 'md-locate',
-    description: [
-      'Event 1 Description',
-      'Event 1 Description',
-      'Event 1 Description',
-    ],
-  },
-];
+const start = new Date();
+let millis = start.getTime();
+// now.getTime()
+const newData = d.path.reduce((acc, el) => {
+  const arr = el.instructions.split(' ');
+  let mode = arr[0];
+  let des = arr.slice(2).join(' ');
+  millis = el.duration.value * 1000 + millis;
+  const m = new Date(millis);
+  
+  return [...acc, {
+      title: `${mode} ${el.duration.text}`,
+      icon: el.travelMode === 'WALKING' ? 'md-walk' : 'md-bus'
+    }, {
+      title: des,
+      icon: 'md-locate',
+      time: `${m.getHours()}:${m.getMinutes() < 10 ? '0' + m.getMinutes() : m.getMinutes()}`
+    }]
+}, [{title: `Ylioppilaskylä, Turku`, icon: 'md-locate', time: `${start.getHours()}:${start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()}`}] );
+
 
 export default class View3 extends React.Component {
   static navigationOptions = ({navigation}) => ({
@@ -116,8 +73,8 @@ export default class View3 extends React.Component {
   state = {
     // default to HELSINKI
     region: {
-      latitude: 37.78825,
-      longitude: -122.4324,
+      latitude: 60.4521556,
+      longitude: 22.266266200000018,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     },
@@ -125,6 +82,8 @@ export default class View3 extends React.Component {
     scrollY: new Animated.Value(0),
     isCollapsed: true,
   };
+
+  componentWillMount
   onRegionChange(region) {
     this.setState({ region });
   }
@@ -132,6 +91,19 @@ export default class View3 extends React.Component {
   renderDetail = (rowData, sectionID, rowID) => {
     return <TimelineItem rowData={rowData} />;
   };
+
+  renderPolyLine = () => {
+    return d.path.map((el, i) => {
+      return (
+        <MapView.Polyline
+          key={i}
+          coordinates={el.path.map(({ lat, lng }) => ({ latitude: lat, longitude: lng}))}
+          strokeColor={el.travelMode === "TRANSIT" ? "#203546" : "red"} 
+          strokeWidth={5}
+        />
+      )
+    })
+  }
 
   render() {
     const headerHeight = this.state.scrollY.interpolate({
@@ -149,33 +121,26 @@ export default class View3 extends React.Component {
     //   outputRange: [1, 0],
     //   extrapolate: 'clamp',
     // });
+    console.log(d);
     return (
       <View style={styles.container}>
         <Animated.View style={[styles.header, { height: headerHeight }]}>
           <MapView
             style={styles.map}
             initialRegion={{
-              latitude: 60.16952,
-              longitude: 24.93545,
+              latitude: 60.4521556,
+              longitude: 22.266266200000018,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}>
             <MapView.Marker
-              coordinate={{
-                latitude: 60.16952,
-                longitude: 24.93545,
-              }}
-              title={'Helsinki'}
-              description={"Finland's Capital"}
-              key={'capital'}
-            />
-            <MapView.Polyline
-              coordinates={polylineCoors}
-              strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
-              strokeColors={['#000']}
-              strokeWidth={2}
-            />
+              title="Starting point"
+              description="Yo-kyla"
+              coordinate={{ latitude: d.path[0].startLocation.lat, longitude: d.path[0].startLocation.lng}}>
+            </MapView.Marker>
+            {this.renderPolyLine()}
           </MapView>
+          
         </Animated.View>
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
@@ -190,20 +155,21 @@ export default class View3 extends React.Component {
           ])}
           scrollEventThrottle={16}>
           <Timeline
-            data={data}
+            data={newData}
             renderDetail={this.renderDetail}
             options={{
               removeClippedSubviews: false,
               style:{paddingTop:5}
             }}
-            circleSize={18}
+            circleSize={25}
             circleColor='#B3D6C6'
             lineColor='#B3D6C6'
             timeContainerStyle={{minWidth:52, marginTop: -5, marginBottom: 40}}
-            timeStyle={{textAlign: 'center', backgroundColor:'#f7c744', color:'#203546', padding: 5, borderRadius:13}}
+            timeStyle={{textAlign: 'center', color:'#B3D6C6', padding: 5, borderRadius:13}}
             descriptionStyle={{ marginTop: 0 }}
             detailContainerStyle={{ marginTop: -15 }}
             innerCircle={'icon'}
+            columnFormat='single-column-left'
           />
         </ScrollView>
       </View>

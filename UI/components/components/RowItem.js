@@ -8,10 +8,26 @@ import {
   UIManager,
   LayoutAnimation,
   FlatList,
-  StyleSheet
+  StyleSheet,
+  Image
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import RowSubItem from './RowSubItem'
+
+const IMAGES = {
+  meat: require('../../assets/meat.png'),
+  beverages: require('../../assets/beverages.png'),
+  canned_goods: require('../../assets/canned_goods.png'),
+  dairy: require('../../assets/dairy.png'),
+  dry_goods: require("../../assets/dry_goods.png"),
+  personal_care: require('../../assets/personal_care.png'),
+  bakery: require('../../assets/bakery.png'),
+  frozen_foods: require('../../assets/frozen_foods.png'),
+  produce: require('../../assets/produce.png'),
+  cleaners: require('../../assets/cleaners.png'),
+  paper_goods: require('../../assets/paper_goods.png'),
+  other: require('../../assets/other.png')
+}
 
 class RowItem extends Component {
 
@@ -165,7 +181,6 @@ class RowItem extends Component {
       selectedItems,
     } = this.props
     const hasDropDown = item[subKey] && item[subKey].length > 0 && showDropDowns
-
     return (
       <View>
         <View
@@ -191,14 +206,15 @@ class RowItem extends Component {
               numberOfLines={itemNumberOfLines}
               style={
                 [{
+                  height: 60,
                   flex: 1,
                   color: item.disabled ? mergedColors.disabled : mergedColors.text
                 },
                 itemFontFamily,
                 mergedStyles.itemText, this._itemSelected(item) && mergedStyles.selectedItemText
               ]}
-            >
-              {item[displayKey]}
+            > 
+              <Image source={IMAGES[item.id]} style={{ width: 40, height: 40}} />  {item[displayKey]}
             </Text>
             {
             this._itemSelected(item) ?

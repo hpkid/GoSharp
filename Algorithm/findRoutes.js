@@ -1,3 +1,4 @@
+// Find list of 3 routes: cheapest, fastest or average price + time
 (function IFFE() {
   initMap();
 })();

@@ -9,7 +9,13 @@ import {
 } from 'react-native';
 import Accordion from 'react-native-collapsible/Accordion';
 import { Constants } from 'expo';
+import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import { AsyncStorage } from 'react-native';
+// import { getData } from '../services/helpers';
+
+import d from './d';
+import { turku } from './data';
 
 const styles = StyleSheet.create({
   container: {
@@ -60,13 +66,14 @@ const SECTIONS = [
   {
     title: 'First route',
     content: 'Lorem ipsum...',
+    totalTime: d.totalTime
   },
   {
-    title: 'Second route',
+    title: 'Second route - Least time',
     content: 'Lorem ipsum...',
   },
   {
-    title: 'Third route',
+    title: 'Third route - Medium Choice',
     content: 'Lorem ipsum...',
   },
 ];
@@ -77,21 +84,38 @@ export default class View2 extends React.Component {
   };
   state = {
     activeSections: [],
+    shopping_list: []
   };
 
+  async componentWillMount() {
+    try {
+      const value = await AsyncStorage.getItem('shopping_list');
+      console.log(value, this.props.navigation.getParam('origin').city)
+      // getData(value, this.props.navigation.getParam('origin').city)
+      this.props.navigation.getParam('origin')
+      if (value !== null) {
+        // We have data!!
+        this.setState((state, props) => {
+          return { shopping_list: JSON.parse(value) };
+        });
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+  }
   _renderHeader = section => {
     return (
       <View style={styles.header}>
         <Text style={styles.headerText}>{section.title}</Text>
-        <Text style={styles.headerText}>{`x minutes - y euros`}</Text>
+        <Text style={styles.headerText}>{`${section.totalTime ? Math.round(section.totalTime/60000): 'x'} minutes - y euros`}</Text>
       </View>
     );
   };
 
   _renderContent = section => {
     return (
-      <View style={styles.content} onPress={() => this.props.navigation.navigate('View3')}>
-        <Text style={styles.headerText}>Total time: x minutes</Text>
+      <View style={styles.content}>
+        <Text style={styles.headerText}>Total time: {section.totalTime ? Math.round(section.totalTime/60000): 'x'} minutes</Text>
         <Text style={styles.headerText}>Total cost: y euros</Text>
         <Text style={[styles.headerText, { color: '#75B9BE'}]} onPress={() => this.props.navigation.navigate('View3')}>Choose this route</Text>
       </View>
@@ -103,6 +127,7 @@ export default class View2 extends React.Component {
   };
 
   render() {
+    // console.log(this.props.navigation.getParam('origin'), this.props.navigation.getParam('destination'))
     return (
       <ScrollView
         keyboardShouldPersistTaps="always"

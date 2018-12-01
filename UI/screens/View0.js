@@ -21,80 +21,125 @@ import { LinearGradient, Constants } from 'expo';
 
 const items = [
   {
-    name: 'Fruits',
-    id: 0,
+    name: "Meat",
+    id: "meat",
     children: [
       {
-        name: 'Apple',
-        id: 10,
+        name: "Meat Ball",
+        id: "meat_ball"
       },
       {
-        name: 'Strawberry',
-        id: 17,
-      },
-      {
-        name: 'Pineapple',
-        id: 13,
-      },
-      {
-        name: 'Banana',
-        id: 14,
-      },
-      {
-        name: 'Watermelon',
-        id: 15,
-      },
-      {
-        name: 'Kiwi fruit',
-        id: 16,
-      },
-    ],
+        name: "Minced Meat",
+        id: "minced_meat"
+      }
+    ]
   },
   {
-    name: 'Gems',
-    id: 1,
+    name: "Dairy",
+    id: "dairy",
     children: [
       {
-        name: 'Quartz',
-        id: 20,
+        name: "Red Milk",
+        id: "red_milk"
       },
       {
-        name: 'Zircon',
-        id: 21,
-      },
-      {
-        name: 'Sapphire',
-        id: 22,
-      },
-      {
-        name: 'Topaz',
-        id: 23,
-      },
-    ],
+        name: "Blue Milk",
+        id: "blue_milk"
+      }
+    ]
   },
   {
-    name: 'Plants',
-    id: 2,
+    name: "Dry Goods",
+    id: "dry_goods",
     children: [
       {
-        name: "Mother In Law's Tongue",
-        id: 30,
-      },
-      {
-        name: 'Yucca',
-        id: 31,
-      },
-      {
-        name: 'Monsteria',
-        id: 32,
-      },
-      {
-        name: 'Palm',
-        id: 33,
-      },
-    ],
+        name: "Sugar",
+        id: "sugar"
+      }
+    ]
   },
+  {
+    name: "Beverages",
+    id: "beverages",
+    children: [
+      {
+        name: "Cafe",
+        id: "cafe"
+      }
+    ]
+  },
+  {
+    name: "Personal Care",
+    id: "personal_care",
+    children: [
+      {
+        name: "Head & Shoulder",
+        id: "headandshoulder"
+      },
+      {
+        name: "Facial Wash",
+        id: "facial_wash"
+      },
+      {
+        name: "Baby powder",
+        id: "baby_powder"
+      }
+    ]
+  },
+  {
+    name: "Canned Goods",
+    id: "canned_goods",
+    children: [
+      {
+        name: "Sweet Chilli Sauce",
+        id: "sweet_chilli_sauce"
+      }
+    ]
+  },
+  {
+    name: "Bakery",
+    id: "bakery",
+    children: [
+
+    ]
+  },
+  {
+    name: "Cleaners",
+    id: "cleaners",
+    children: [
+
+    ]
+  },
+  {
+    name: "Frozen Foods",
+    id: "frozen_foods",
+    children: [
+
+    ]
+  },
+  {
+    name: "Other",
+    id: "other",
+    children: [
+
+    ]
+  },
+  {
+    name: "Paper Goods",
+    id: "paper_goods",
+    children: [
+
+    ]
+  },
+  {
+    name: "Produce",
+    id: "produce",
+    children: [
+      
+    ]
+  }
 ];
+
 
 const styles = StyleSheet.create({
   container: {
@@ -140,13 +185,11 @@ export default class View0 extends Component {
   };
   state = {
     selectedItems: [],
-    string: 'hello',
   };
 
   async componentWillMount() {
     try {
       const value = await AsyncStorage.getItem('shopping_list');
-      console.log(value);
       if (value !== null) {
         // We have data!!
         this.setState((state, props) => {
@@ -196,6 +239,7 @@ export default class View0 extends Component {
           colors={{
             selectToggleTextColor: '#A8CCC9',
             chipColor: '#A8CCC9',
+            primary: '#f7c744'
           }}
         />
         <View
